@@ -1,81 +1,155 @@
 const mongoose = require('mongoose');
+const express = require('express');
+const app = express();
 const users = require('./user')
+const port = 5000;
+
+
+app.use(express.json());
 
 mongoose.connect('mongodb+srv://sivaharshanfastbokz:uoazQaGUCRMUERcC@cluster0.lcmnw6s.mongodb.net/mongoose_app?retryWrites=true&w=majority',
 {
     useNewUrlParser: true
 }
-).then(()=>{
-    console.log('connected')
-}).catch(()=>{
-    console.log('connection to database failed')
+);
+
+app.post('/userdata',async(req,res)=>{
+    const{userName,userAge,userEmail,hobbies,address}=req.body;
+    const userDetails = new users({
+        userName,
+        userAge,
+        userEmail,
+        hobbies,
+        address
+    });
+ try {
+     await userDetails.save();
+     res.status(200).json({message:'userdata successfully inserted'})
+ } catch (error) {
+    res.status(500).json({error:'internal server error'})
+ }
 })
 
-//  async function createDatabase(){
-//     try {
-//         const userDetails = await users.create({
-//             userName:'tony',
-//             userAge:22,
-//             userEmail:'tony123@gmail.com',
-//             hobbies:['inventing new things'],
-//             address:{
-//                 street:'north across st',
-//                 city:'san francisco'
-//             },
-//     })
-//         await userDetails.save()
-//     } catch (error) {
-//         console.log(error.message)
-//     }
-//  }
-// createDatabase();
 
-// async function findUserAndUpdate(){
-//     try {
-//         const update = await users.findByIdAndUpdate("64c763b405678d0e6f5a219d",{$set:{userName:'tonystark'}})
-//         console.log(update)
-//     } catch (error) {
-//         console.log(error.message)
-//     }
-// }
-// findUserAndUpdate();
-
-// async function findAllUsers(){
-//     try {
-//         const findUsers = await users.find();
-//         console.log(findUsers)
-//     } catch (error) {
-//         console.log(error.message)
-//     }
-// }
-// findAllUsers();
-
-// async function findOneUser(){
-//       try {
-//         const oneUser = await users.findOne({userName:'kelly'})
-//         console.log(oneUser)
-//       } catch ({error}) {
-//         console.log(error.message)
-//       }
-// }
-// findOneUser();
-
-// async function findUserAndRemove(){
-//     try {
-//         const findAndRemove = await users.findOneAndRemove({userName:'tony'})
-//         console.log(findAndRemove)
-//     } catch (error) {
-//         console.log(error.message)
-//     }
-// }
-// findUserAndRemove();
-
-async function usersWhere(){
+app.get('/getalluserlist',async(req,res)=>{
     try {
-        const findWhere = await users.where('userName').equals('nick')
-        console.log(findWhere)
+        const getUsers = await users.find()
+        res.json(getUsers)
     } catch (error) {
-        console.log(error.message)
+        res.status(500).json({error:'internal server error'})
     }
-}
-usersWhere();
+})
+
+app.get('/getuserlist',async(req,res)=>{
+    try {
+        const getUsers = await users.find().where('userName').equals('tony').where('userAge').lte(26).select('hobbies')
+        res.json(getUsers)
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+
+app.get('/getalluserlist/:id',async(req,res)=>{
+    try {
+        const id = req.params.id
+        const getUsers = await users.findById(id)
+        res.json(getUsers)
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+app.delete('/deleteuserdata/:id',async(req,res)=>{
+    try {
+        const id = req.params.id
+        await users.findByIdAndDelete(id)
+        res.json({message:'userdata deleted successfully'})
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+app.get('/getuserlist/:userName',async(req,res)=>{
+    try {
+        const userName = req.params.userName
+        const getUserByName = await users.findOne({userName})
+        res.json(getUserByName)
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+
+
+app.delete('/deleteuserlist/:userName',async(req,res)=>{
+    try {
+        const userName = req.params.userName
+        const deleteUserByName = await users.findOneAndDelete({userName})
+        res.json(deleteUserByName)
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+// app.put('/findoneandupdate/:id',async(req,res)=>{
+//     try {
+//         const userName = req.params.userName
+//         let query = {_id:id}
+//         const updateUserByName = await users.findOneAndUpdate({userName})
+//         res.json(updateUserByName)
+//     } catch (error) {
+//         res.status(500).json({error:'internal server error'})
+//     }
+// })
+
+
+app.put('/updateuserlist',async(req,res)=>{
+    try {
+        // const userName = req.params.userName
+        const updateUserByName = await users.updateOne({userName:'tony'},{$set:{userName:'tony stark'}}).where('userAge').equals(26)
+        res.json(updateUserByName)
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+
+app.put('/updateuser/:id',async(req,res)=>{
+    const {userName,userAge,userEmail,hobbies,address} = req.body
+    const id = req.params.id
+    try {
+    const updatedUser = await users.findByIdAndUpdate(id,{
+        userName,
+        userAge,
+        userEmail,
+        hobbies,
+        address
+    })
+    res.json(updatedUser);
+    } catch (error) {
+        res.status(500).json({error:'internal server error'})
+    }
+})
+
+// app.put('/replace/:id',async(req,res)=>{
+//     const {userName,userAge,userEmail,hobbies,address} = req.body
+//     const id = req.params.id
+//     try {
+//     const updatedUser = await users.replaceOne(id,{
+//         userName,
+//         userAge,
+//         userEmail,
+//         hobbies,
+//         address
+//     })
+//     res.json(updatedUser);
+//     } catch (error) {
+//         res.status(500).json({error:'internal server error'})
+//     }
+// })
+
+
+app.listen(port,()=>{
+    console.log(`server started on port ${port}`)
+});
