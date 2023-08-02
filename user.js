@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     userName:{
         type:String,
-        required:true
+        required:true,
+        maxLength:[12,'characters should be less than 12']
     },
     userAge:{
         type:Number,
-        required:true
+        required:true,
+        min:[18,' Age Must be 18 & Above'],
     },
     userEmail:{
         type:String,
@@ -30,6 +32,10 @@ const userSchema = new mongoose.Schema({
             type:String,
             required:true
         }
+    },
+    isActive:{
+        type:Boolean,
+        required:true
     }
 })
 
