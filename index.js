@@ -15,14 +15,17 @@ mongoose.connect('mongodb+srv://sivaharshanfastbokz:uoazQaGUCRMUERcC@cluster0.lc
 );
 
 app.post('/userdata',async(req,res)=>{
-    const{userName,userAge,userEmail,hobbies,address,isActive}=req.body;
+    const{userName,userAge,userEmail,hobbies,address,isActive,Favdrink,prevSchool,GradeRating}=req.body;
     const userDetails = new users({
         userName,
         userAge,
         userEmail,
         hobbies,
         address,
-        isActive
+        isActive,
+        Favdrink,
+        prevSchool,
+        GradeRating
     });
  try {
      await userDetails.save();

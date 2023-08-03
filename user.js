@@ -36,6 +36,19 @@ const userSchema = new mongoose.Schema({
     isActive:{
         type:Boolean,
         required:true
+    },
+    Favdrink:{
+        type:String,
+        enum:['Tea','Coffee'],
+        required:true
+    },
+    prevSchool:{
+        type:mongoose.Schema.Types.Mixed,
+        required:true
+    },
+    GradeRating:{
+        type:Map,
+        of:String
     }
 })
 
